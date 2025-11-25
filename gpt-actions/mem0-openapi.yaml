@@ -63,38 +63,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/ListMemoriesResponse"
 
-  /memories/search:
-    get:
+    /search:
+    post:
       operationId: searchMemories
       summary: Semantic search over memories
       description: >
         Search existing memories for a given user using a natural language query.
-      parameters:
-        - name: user_id
-          in: query
-          required: true
-          schema:
-            type: string
-          description: User ID to search memories for
-        - name: agent_id
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Optional agent identifier (e.g. "vera")
-        - name: query
-          in: query
-          required: true
-          schema:
-            type: string
-          description: Natural language search query
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 20
-          description: Max results to return
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query, user_id]
+              properties:
+                query:
+                  type: string
+                  description: Natural language search query
+                user_id:
+                  type: string
+                  description: User ID to search memories for
+                agent_id:
+                  type: string
+                  description: Optional agent identifier (e.g. "vera")
+                limit:
+                  type: integer
+                  default: 20
+                  description: Max results to return
       responses:
         "200":
           description: Search results
