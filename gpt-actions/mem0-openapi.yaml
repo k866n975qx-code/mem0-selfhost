@@ -63,7 +63,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ListMemoriesResponse"
 
-    /search:
+      /search:
     post:
       operationId: searchMemories
       summary: Semantic search over memories
