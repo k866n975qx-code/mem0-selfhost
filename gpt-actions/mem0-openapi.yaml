@@ -111,9 +111,9 @@ paths:
             schema:
               type: object
               required:
-                - memory
+                - text
               properties:
-                memory:
+                text:
                   type: string
                 metadata:
                   type: object
