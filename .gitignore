@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual envs
+.venv/
+venv/
+
+# Local env files
+.env
+.env.*
+
+# Mem0 local data
+mem0/server/history/
+mem0/server/chroma_db/
+history/
+chroma_db/
+
+# OS junk
+.DS_Store

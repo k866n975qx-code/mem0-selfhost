@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  title: Self-Hosted Mem0 API
+  version: "1.0.0"
+  description: |
+    Self-hosted Mem0 REST API.
+    Use this to store, search, update, and delete long-term memories
+    for a specific user / agent / run.
+
+servers:
+  - url: https://mem0.your-domain.com
+    description: Public URL (behind Cloudflare Tunnel) for your Mem0 server
+
+paths:
+  /memories:
+    post:
+      operationId: addMemories
+      summary: Add new memories
+      description: >
+        Add one or more messages that should be turned into memories
+        for a given user / agent / run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      role:
+                        type: string
+                        description: "user or assistant"
+                        example: user
+                      content:
+                        type: string
+                        example: "User prefers high-yield dividend ETFs."
+                user_id:
+                  type: string
+                  nullable: true
+                  description: Optional user ID
+                  example: "jose"
+                agent_id:
+                  type: string
+                  nullable: true
+                  description: Optional agent/assistant ID
+                  example: "vera"
+                run_id:
+                  type: string
+                  nullable: true
+                  description: Optional run/session ID
+                metadata:
+                  type: object
+                  nullable: true
+                  additionalProperties: true
+                  description: Optional metadata for filtering
+      responses:
+        "200":
+          description: Memories created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+    get:
+      operationId: listMemories
+      summary: List memories for an identifier
+      description: >
+        Get all memories for a specific user_id, agent_id, or run_id.
+        At least one identifier is required.
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: agent_id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: run_id
+          schema:
+            type: string
+          required: false
+      responses:
+        "200":
+          description: List of memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+    delete:
+      operationId: deleteAllMemories
+      summary: Delete all memories for an identifier
+      description: >
+        Delete all memories for a given user_id, agent_id, or run_id.
+        At least one identifier is required.
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: agent_id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: run_id
+          schema:
+            type: string
+          required: false
+      responses:
+        "200":
+          description: Delete result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /memories/{memory_id}:
+    get:
+      operationId: getMemory
+      summary: Get a memory by ID
+      parameters:
+        - in: path
+          name: memory_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Memory
+          content:
+            application/json:
+              schema:
+                type: object
+
+    put:
+      operationId: updateMemory
+      summary: Update a memory by ID
+      parameters:
+        - in: path
+          name: memory_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Arbitrary fields to update on the memory
+      responses:
+        "200":
+          description: Updated memory
+          content:
+            application/json:
+              schema:
+                type: object
+
+    delete:
+      operationId: deleteMemory
+      summary: Delete a memory by ID
+      parameters:
+        - in: path
+          name: memory_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Delete result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /search:
+    post:
+      operationId: searchMemories
+      summary: Search memories
+      description: >
+        Semantic search over memories for a given user / agent / run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Natural language search query
+                  example: "What does the user prefer for dividend yield?"
+                user_id:
+                  type: string
+                  nullable: true
+                agent_id:
+                  type: string
+                  nullable: true
+                run_id:
+                  type: string
+                  nullable: true
+                filters:
+                  type: object
+                  nullable: true
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /reset:
+    post:
+      operationId: resetAllMemories
+      summary: Reset all memories
+      description: Completely reset the underlying memory store.
+      responses:
+        "200":
+          description: Reset result
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas: {}
+  securitySchemes:
+    # Start with no auth; we’ll secure via Cloudflare/Zero Trust
+    none:
+      type: http
+      scheme: none
+
+security:
+  - none: []
