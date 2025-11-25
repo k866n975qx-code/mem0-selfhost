@@ -116,6 +116,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - memory
               properties:
                 memory:
                   type: string
