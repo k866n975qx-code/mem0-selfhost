@@ -1,256 +1,194 @@
 openapi: 3.1.0
 info:
-  title: Self-Hosted Mem0 API
+  title: Mem0 Self-Hosted API
   version: "1.0.0"
   description: |
-    Self-hosted Mem0 REST API.
-    Use this to store, search, update, and delete long-term memories
-    for a specific user / agent / run.
+    Self-hosted Mem0 REST API exposed at api.joseai.dev.
+    Used by Jose's personal GPT to store and search long-term memories.
 
 servers:
   - url: https://api.joseai.dev
-    description: Public HTTPS URL for your Mem0 server (Cloudflare Tunnel)
+    description: Mem0 server via Cloudflare tunnel
 
 paths:
   /memories:
     post:
       operationId: addMemories
-      summary: Add new memories
+      summary: Add memories from a conversation
       description: >
-        Add one or more messages that should be turned into memories
-        for a given user / agent / run.
+        Given a list of messages (chat turns), extract and persist
+        long-term memories for a specific user (and optional agent).
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [messages]
-              properties:
-                messages:
-                  type: array
-                  items:
-                    type: object
-                    required: [role, content]
-                    properties:
-                      role:
-                        type: string
-                        description: "user or assistant"
-                        example: user
-                      content:
-                        type: string
-                        example: "User prefers high-yield dividend ETFs."
-                user_id:
-                  type: string
-                  nullable: true
-                  description: Optional user ID
-                  example: "jose"
-                agent_id:
-                  type: string
-                  nullable: true
-                  description: Optional agent/assistant ID
-                  example: "vera"
-                run_id:
-                  type: string
-                  nullable: true
-                  description: Optional run/session ID
-                metadata:
-                  type: object
-                  nullable: true
-                  additionalProperties: true
-                  description: Optional metadata for filtering
+              $ref: "#/components/schemas/AddMemoriesRequest"
       responses:
         "200":
-          description: Memories created
+          description: Memories created successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                $ref: "#/components/schemas/AddMemoriesResponse"
 
     get:
       operationId: listMemories
-      summary: List memories for an identifier
-      description: >
-        Get all memories for a specific user_id, agent_id, or run_id.
-        At least one identifier is required.
+      summary: List memories for a user
       parameters:
-        - in: query
-          name: user_id
+        - name: user_id
+          in: query
+          schema:
+            type: string
+          required: true
+          description: User ID to list memories for
+        - name: agent_id
+          in: query
           schema:
             type: string
           required: false
-        - in: query
-          name: agent_id
+          description: Optional agent identifier (e.g. "vera", "nova")
+        - name: limit
+          in: query
           schema:
-            type: string
+            type: integer
+            default: 20
           required: false
-        - in: query
-          name: run_id
-          schema:
-            type: string
-          required: false
+          description: Max memories to return
       responses:
         "200":
           description: List of memories
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                $ref: "#/components/schemas/ListMemoriesResponse"
 
-    delete:
-      operationId: deleteAllMemories
-      summary: Delete all memories for an identifier
-      description: >
-        Delete all memories for a given user_id, agent_id, or run_id.
-        At least one identifier is required.
-      parameters:
-        - in: query
-          name: user_id
-          schema:
-            type: string
-          required: false
-        - in: query
-          name: agent_id
-          schema:
-            type: string
-          required: false
-        - in: query
-          name: run_id
-          schema:
-            type: string
-          required: false
-      responses:
-        "200":
-          description: Delete result
-          content:
-            application/json:
-              schema:
-                type: object
-
-  /memories/{memory_id}:
+  /memories/search:
     get:
-      operationId: getMemory
-      summary: Get a memory by ID
-      parameters:
-        - in: path
-          name: memory_id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Memory
-          content:
-            application/json:
-              schema:
-                type: object
-
-    put:
-      operationId: updateMemory
-      summary: Update a memory by ID
-      parameters:
-        - in: path
-          name: memory_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Arbitrary fields to update on the memory
-      responses:
-        "200":
-          description: Updated memory
-          content:
-            application/json:
-              schema:
-                type: object
-
-    delete:
-      operationId: deleteMemory
-      summary: Delete a memory by ID
-      parameters:
-        - in: path
-          name: memory_id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Delete result
-          content:
-            application/json:
-              schema:
-                type: object
-
-  /search:
-    post:
       operationId: searchMemories
-      summary: Search memories
+      summary: Semantic search over memories
       description: >
-        Semantic search over memories for a given user / agent / run.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [query]
-              properties:
-                query:
-                  type: string
-                  description: Natural language search query
-                  example: "What does the user prefer for dividend yield?"
-                user_id:
-                  type: string
-                  nullable: true
-                agent_id:
-                  type: string
-                  nullable: true
-                run_id:
-                  type: string
-                  nullable: true
-                filters:
-                  type: object
-                  nullable: true
-                  additionalProperties: true
+        Search existing memories for a given user using a natural language query.
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: User ID to search memories for
+        - name: agent_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional agent identifier (e.g. "vera")
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Natural language search query
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: Max results to return
       responses:
         "200":
           description: Search results
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-
-  /reset:
-    post:
-      operationId: resetAllMemories
-      summary: Reset all memories
-      description: Completely reset the underlying memory store.
-      responses:
-        "200":
-          description: Reset result
-          content:
-            application/json:
-              schema:
-                type: object
+                $ref: "#/components/schemas/SearchMemoriesResponse"
 
 components:
-  schemas: {}
-  securitySchemes:
-    # Start with no auth; we’ll secure via Cloudflare/Zero Trust
-    none:
-      type: http
-      scheme: none
+  schemas:
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          description: Role in the conversation
+          enum: [user, assistant, system]
+        content:
+          type: string
+          description: Text content of the message
 
-security:
-  - none: []
+    AddMemoriesRequest:
+      type: object
+      required:
+        - messages
+        - user_id
+      properties:
+        messages:
+          type: array
+          description: Conversation messages to analyze for memories
+          items:
+            $ref: "#/components/schemas/Message"
+        user_id:
+          type: string
+          description: User identifier (e.g. "jose")
+        agent_id:
+          type: string
+          description: Optional agent identifier (e.g. "vera", "nova")
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Optional metadata to store alongside the memories
+
+    MemoryItem:
+      type: object
+      description: A single stored memory entry
+      properties:
+        id:
+          type: string
+          description: Memory ID
+        memory:
+          type: string
+          description: Memory text/content
+        user_id:
+          type: string
+        agent_id:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        score:
+          type: number
+          format: float
+          description: Similarity score (for search results)
+        created_at:
+          type: string
+          format: date-time
+
+    AddMemoriesResponse:
+      type: object
+      description: Result of adding new memories
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryItem"
+
+    ListMemoriesResponse:
+      type: object
+      description: List of memories for a user
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryItem"
+
+    SearchMemoriesResponse:
+      type: object
+      description: Search results over memories
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryItem"
