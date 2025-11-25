@@ -23,7 +23,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddMemoriesRequest"
+              type: object
+              required:
+                - messages
+                - user_id
+              properties:
+                messages:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Message"
+                user_id:
+                  type: string
+                agent_id:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
       responses:
         "200":
           description: Memories created successfully
