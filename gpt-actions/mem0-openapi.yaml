@@ -116,37 +116,6 @@ paths:
                   success:
                     type: boolean
 
-    put:
-      operationId: updateMemory
-      summary: Update an existing memory
-      parameters:
-        - in: path
-          name: memory_id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - memory
-              properties:
-                memory:
-                  type: string
-                metadata:
-                  type: object
-                  additionalProperties: true
-      responses:
-        "200":
-          description: Memory updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MemoryItem"
-
   /reset:
     post:
       operationId: resetMemories
