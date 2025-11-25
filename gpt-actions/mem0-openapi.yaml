@@ -47,27 +47,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/AddMemoriesResponse"
 
-  /search:
-    post:
-      operationId: searchMemories
-      summary: Semantic search over memories
-      description: >
-        Search existing memories for a given user using a natural language query.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SearchMemoriesRequest"
-      responses:
-        "200":
-          description: Search results
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SearchMemoriesResponse"
-
-  /memories:
     get:
       operationId: listMemories
       summary: List all memories for a user
@@ -94,6 +73,26 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/MemoryItem"
+
+  /search:
+    post:
+      operationId: searchMemories
+      summary: Semantic search over memories
+      description: >
+        Search existing memories for a given user using a natural language query.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchMemoriesRequest"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchMemoriesResponse"
 
   /memories/{memory_id}:
     put:
