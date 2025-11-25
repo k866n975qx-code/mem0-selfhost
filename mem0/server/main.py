@@ -78,6 +78,10 @@ class SearchRequest(BaseModel):
     filters: Optional[Dict[str, Any]] = None
 
 
+class UpdateMemoryRequest(BaseModel):
+    text: str = Field(..., description="New memory text.")
+
+
 @app.post("/configure", summary="Configure Mem0")
 def set_config(config: Dict[str, Any]):
     """Set memory configuration."""
@@ -142,18 +146,20 @@ def search_memories(search_req: SearchRequest):
 
 
 @app.put("/memories/{memory_id}", summary="Update a memory")
-def update_memory(memory_id: str, updated_memory: Dict[str, Any]):
+def update_memory(memory_id: str, updated_memory: UpdateMemoryRequest):
     """Update an existing memory with new content.
     
     Args:
         memory_id (str): ID of the memory to update
-        updated_memory (str): New content to update the memory with
+        updated_memory (UpdateMemoryRequest): New content to update the memory with
         
     Returns:
-        dict: Success message indicating the memory was updated
+        dict: Updated memory payload
     """
     try:
-        return MEMORY_INSTANCE.update(memory_id=memory_id, data=updated_memory)
+        # Pass only the raw text string into the underlying Memory.update,
+        # since it expects a string, not a dict.
+        return MEMORY_INSTANCE.update(memory_id=memory_id, data=updated_memory.text)
     except Exception as e:
         logging.exception("Error in update_memory:")
         raise HTTPException(status_code=500, detail=str(e))
