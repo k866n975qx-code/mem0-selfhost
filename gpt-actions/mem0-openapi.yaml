@@ -32,38 +32,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AddMemoriesResponse"
 
-    get:
-      operationId: listMemories
-      summary: List memories for a user
-      parameters:
-        - name: user_id
-          in: query
-          schema:
-            type: string
-          required: true
-          description: User ID to list memories for
-        - name: agent_id
-          in: query
-          schema:
-            type: string
-          required: false
-          description: Optional agent identifier (e.g. "vera", "nova")
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-          required: false
-          description: Max memories to return
-      responses:
-        "200":
-          description: List of memories
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListMemoriesResponse"
-
-      /search:
+  /search:
     post:
       operationId: searchMemories
       summary: Semantic search over memories
@@ -74,22 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [query, user_id]
-              properties:
-                query:
-                  type: string
-                  description: Natural language search query
-                user_id:
-                  type: string
-                  description: User ID to search memories for
-                agent_id:
-                  type: string
-                  description: Optional agent identifier (e.g. "vera")
-                limit:
-                  type: integer
-                  default: 20
-                  description: Max results to return
+              $ref: "#/components/schemas/SearchMemoriesRequest"
       responses:
         "200":
           description: Search results
@@ -170,14 +124,25 @@ components:
           items:
             $ref: "#/components/schemas/MemoryItem"
 
-    ListMemoriesResponse:
+    SearchMemoriesRequest:
       type: object
-      description: List of memories for a user
+      required:
+        - query
+        - user_id
       properties:
-        results:
-          type: array
-          items:
-            $ref: "#/components/schemas/MemoryItem"
+        query:
+          type: string
+          description: Natural language search query
+        user_id:
+          type: string
+          description: User ID to search memories for
+        agent_id:
+          type: string
+          description: Optional agent identifier (e.g. "vera")
+        limit:
+          type: integer
+          default: 20
+          description: Max results to return
 
     SearchMemoriesResponse:
       type: object
