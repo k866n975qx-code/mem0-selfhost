@@ -8,8 +8,8 @@ info:
     for a specific user / agent / run.
 
 servers:
-  - url: https://mem0.your-domain.com
-    description: Public URL (behind Cloudflare Tunnel) for your Mem0 server
+  - url: https://api.joseai.dev
+    description: Public HTTPS URL for your Mem0 server (Cloudflare Tunnel)
 
 paths:
   /memories:
