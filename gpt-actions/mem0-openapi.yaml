@@ -52,6 +52,112 @@ paths:
               schema:
                 $ref: "#/components/schemas/SearchMemoriesResponse"
 
+  /memories:
+    get:
+      operationId: listMemories
+      summary: List all memories for a user
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: agent_id
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of memories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MemoryItem"
+
+  /memories/{memory_id}:
+    delete:
+      operationId: deleteMemory
+      summary: Delete a memory by ID
+      parameters:
+        - in: path
+          name: memory_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Memory deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+    put:
+      operationId: updateMemory
+      summary: Update an existing memory
+      parameters:
+        - in: path
+          name: memory_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memory:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Memory updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryItem"
+
+  /reset:
+    post:
+      operationId: resetMemories
+      summary: Reset all memories for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                agent_id:
+                  type: string
+      responses:
+        "200":
+          description: All memories wiped
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
 components:
   schemas:
     Message:
